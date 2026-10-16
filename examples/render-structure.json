@@ -1,0 +1,10 @@
+{
+  "name": "render_structure",
+  "arguments": {
+    "structure": "CCO",
+    "input_format": "smiles",
+    "output_format": "svg",
+    "width": 400,
+    "height": 300
+  }
+}

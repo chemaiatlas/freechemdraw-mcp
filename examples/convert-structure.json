@@ -1,0 +1,8 @@
+{
+  "name": "convert_structure",
+  "arguments": {
+    "structure": "CCO",
+    "input_format": "smiles",
+    "output_format": "mol"
+  }
+}

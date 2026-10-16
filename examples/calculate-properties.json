@@ -1,0 +1,7 @@
+{
+  "name": "calculate_properties",
+  "arguments": {
+    "structure": "CCO",
+    "input_format": "smiles"
+  }
+}
