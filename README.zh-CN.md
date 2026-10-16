@@ -6,8 +6,6 @@
 
 FreeChemDraw MCP Server 官方文档及接入示例，介绍远程化学结构转换、分子性质计算和二维结构绘图。
 
-> This repository provides documentation and integration examples for the FreeChemDraw hosted MCP service. The server implementation is privately maintained.
-
 本仓库提供 FreeChemDraw 托管 MCP 服务的文档和接入示例。服务端实现由官方私有维护。
 
 [FreeChemDraw](https://freechemdraw.com/) |
@@ -16,6 +14,24 @@ FreeChemDraw MCP Server 官方文档及接入示例，介绍远程化学结构�
 [官方文档](https://ai.freechemdraw.com/docs/)
 
 Remote MCP 地址：`https://ai.freechemdraw.com/mcp`
+
+## 快速开始
+
+1. 选择支持远程 Streamable HTTP 的客户端。
+2. 将服务地址设置为：
+
+   ```text
+   https://ai.freechemdraw.com/mcp
+   ```
+
+3. 连接、发现工具，然后通过客户端调用以下乙醇示例：
+
+   ```json
+   {"name":"calculate_properties","arguments":{"structure":"CCO","input_format":"smiles"}}
+   ```
+
+该对象是 `tools/call` 的参数，不是完整的 HTTP/JSON-RPC 请求。初始化和协议协商由客户端处理。
+返回性质属于计算结果，不等同于实验测量。参见[入门指南](docs/getting-started.md)。
 
 ## 什么是 FreeChemDraw MCP？
 
@@ -47,23 +63,16 @@ FreeChemDraw MCP Server 是面向 AI 智能体和应用的托管服务，提供�
 使用前检查 `tools/list`。也可以手动将 SMILES/MOL 导入在线编辑器，
 参见[工具](docs/tools.md)及[隐私](docs/privacy.md)。
 
-## 快速开始
+## 在 FreeChemDraw 中继续编辑
 
-1. 选择支持远程 Streamable HTTP 的客户端。
-2. 将服务地址设置为：
+1. 请智能体返回规范化的 SMILES，或通过 `convert_structure` 设置 `output_format=mol` 获取 MOL 结构。
+2. 打开 [FreeChemDraw 在线编辑器](https://freechemdraw.com/)，粘贴 SMILES 或导入保存的 MOL 文件。
+3. 在编辑器中检查并继续修改结构。MOL 转为 SMILES 会丢失坐标和注释；需要保留这些信息时使用 MOL。
 
-   ```text
-   https://ai.freechemdraw.com/mcp
-   ```
-
-3. 连接、发现工具，然后通过客户端调用以下乙醇示例：
-
-   ```json
-   {"name":"calculate_properties","arguments":{"structure":"CCO","input_format":"smiles"}}
-   ```
-
-该对象是 `tools/call` 的参数，不是完整的 HTTP/JSON-RPC 请求。初始化和协议协商由客户端处理。
-返回性质属于计算结果，不等同于实验测量。参见[入门指南](docs/getting-started.md)。
+只有实际部署的 `tools/list` 中出现 `get_editor_link` 时，才能使用自动编辑链接。
+该工具要求用户明确同意加密临时存储结构，链接仅可使用一次，10 分钟后失效。
+工具未开放或用户不同意临存时，使用手动导入。本仓库不承诺客户端与编辑器之间自动同步。
+参见[工具](docs/tools.md)和[隐私](docs/privacy.md)。
 
 ## MCP 客户端配置
 
@@ -85,21 +94,9 @@ curl --fail-with-body https://ai.freechemdraw.com/api/v1/properties/calculate -H
 
 ## 使用限制
 
-免费基础服务遵循公平使用限制，不承诺服务等级。以下为参考配置值，生产环境实际值以当前官方服务文档为准。
-
-| 限制项 | 参考值 |
-| --- | --- |
-| 每 IP 的 HTTP 请求数 | 每分钟 20 次 |
-| 每服务进程的 HTTP 请求数 | 每分钟 120 次 |
-| 每个结构的原子数 | 256 |
-| 并发化学操作 | 2 个 |
-| 操作超时 | 10 秒 |
-| HTTP 请求体 | 1 MiB |
-| SMILES / MOL 长度 | 16,384 / 262,144 字符 |
-| 图像尺寸 | 每边 64–2048 像素，总面积最多 2,000,000 像素 |
-
-初始化和工具发现也计入 HTTP 限流。收到 HTTP 429 时遵循 `Retry-After` 并退避重试。
-当前公共契约不通过账户提供 API Key、收费额度或更高化学调用配额，参见[使用限制](docs/usage-limits.md)。
+免费基础服务受限流保护，不承诺服务等级。初始化和工具发现也计入使用量；
+收到 HTTP 429 时遵循 `Retry-After` 并退避重试。
+详细参考限额和错误处理见[使用限制](docs/usage-limits.md)，生产环境实际配置以当前[官方服务文档](https://ai.freechemdraw.com/docs/)为准。
 
 ## 隐私
 

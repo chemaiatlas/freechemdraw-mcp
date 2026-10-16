@@ -16,6 +16,25 @@ remote chemical structure conversion, molecular properties and 2D rendering.
 
 Remote MCP endpoint: `https://ai.freechemdraw.com/mcp`
 
+## Quick Start
+
+1. Choose a client with remote Streamable HTTP support.
+2. Set its server URL to:
+
+   ```text
+   https://ai.freechemdraw.com/mcp
+   ```
+
+3. Connect, list tools and invoke the following ethanol example through the client:
+
+   ```json
+   {"name":"calculate_properties","arguments":{"structure":"CCO","input_format":"smiles"}}
+   ```
+
+This object is the payload for `tools/call`, not a complete HTTP/JSON-RPC request.
+The client handles initialization and protocol negotiation. Results are calculated,
+not experimental measurements. See [getting started](docs/getting-started.md).
+
 ## What is FreeChemDraw MCP?
 
 FreeChemDraw MCP Server is a hosted service for AI agents and applications.
@@ -52,24 +71,21 @@ one-time temporary storage; links expire after 10 minutes. Check `tools/list`
 before using it. Manual SMILES/MOL import into the online editor is an alternative.
 See [tools](docs/tools.md) and [privacy](docs/privacy.md).
 
-## Quick Start
+## Continue Editing in FreeChemDraw
 
-1. Choose a client with remote Streamable HTTP support.
-2. Set its server URL to:
+1. Ask your agent for normalized SMILES, or use `convert_structure` with
+   `output_format=mol` to obtain a MOL structure.
+2. Open the [FreeChemDraw online editor](https://freechemdraw.com/), paste the
+   SMILES or import the saved MOL file.
+3. Inspect and continue editing the structure in the editor. Converting MOL to
+   SMILES loses coordinates and annotations; use MOL when you need to retain them.
 
-   ```text
-   https://ai.freechemdraw.com/mcp
-   ```
-
-3. Connect, list tools and invoke the following ethanol example through the client:
-
-   ```json
-   {"name":"calculate_properties","arguments":{"structure":"CCO","input_format":"smiles"}}
-   ```
-
-This object is the payload for `tools/call`, not a complete HTTP/JSON-RPC request.
-The client handles initialization and protocol negotiation. Results are calculated,
-not experimental measurements. See [getting started](docs/getting-started.md).
+Automatic editor links are available only if the actual deployment advertises
+`get_editor_link` in `tools/list`. The tool requires explicit user consent to
+temporary encrypted storage; links are single-use and expire after 10 minutes.
+If the tool is absent or consent is not given, use manual import. This repository
+does not promise automatic synchronization between your client and the editor.
+See [tools](docs/tools.md) and [privacy](docs/privacy.md).
 
 ## MCP Client Configuration
 
@@ -93,24 +109,11 @@ and the hosted [OpenAPI contract](https://ai.freechemdraw.com/openapi/v1.json).
 
 ## Usage Limits
 
-Free basic access is subject to fair-use limits, without a service-level guarantee.
-The reference configuration uses the following limits; effective production values
-are shown in the current official service documentation.
-
-| Limit | Reference value |
-| --- | --- |
-| HTTP requests per IP | 20 per minute |
-| HTTP requests per server process | 120 per minute |
-| Atoms per structure | 256 |
-| Concurrent chemical operations | 2 |
-| Operation timeout | 10 seconds |
-| HTTP request body | 1 MiB |
-| SMILES / MOL length | 16,384 / 262,144 characters |
-| Image dimensions | 64–2048 pixels per side; at most 2,000,000 pixels |
-
-Initialization and discovery count toward HTTP limits. On HTTP 429, follow
-`Retry-After` and retry with backoff. Accounts do not provide API Keys, paid
-credits or higher chemical quotas under this public contract. See [usage limits](docs/usage-limits.md).
+Free basic access is rate-limited and has no service-level guarantee. Initialization
+and discovery count toward usage; on HTTP 429, follow `Retry-After` and retry with
+backoff. See [usage limits and errors](docs/usage-limits.md) for detailed reference
+limits, and the [official service documentation](https://ai.freechemdraw.com/docs/)
+for effective production settings.
 
 ## Privacy
 

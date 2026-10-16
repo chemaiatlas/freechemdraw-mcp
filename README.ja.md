@@ -6,8 +6,6 @@
 
 FreeChemDraw MCP Server の公式ドキュメントと接続例です。リモートでの化学構造変換、分子物性計算、二次元構造描画を紹介します。
 
-> This repository provides documentation and integration examples for the FreeChemDraw hosted MCP service. The server implementation is privately maintained.
-
 このリポジトリでは FreeChemDraw のホスト型 MCP サービスのドキュメントと連携例を提供します。サーバー実装は非公開で管理されています。
 
 [FreeChemDraw](https://freechemdraw.com/) |
@@ -16,6 +14,25 @@ FreeChemDraw MCP Server の公式ドキュメントと接続例です。リモ�
 [公式ドキュメント](https://ai.freechemdraw.com/docs/)
 
 Remote MCP エンドポイント：`https://ai.freechemdraw.com/mcp`
+
+## クイックスタート
+
+1. リモート Streamable HTTP に対応するクライアントを選びます。
+2. サーバー URL を次の値に設定します。
+
+   ```text
+   https://ai.freechemdraw.com/mcp
+   ```
+
+3. 接続してツールを検出し、クライアント経由で次のエタノールの例を呼び出します。
+
+   ```json
+   {"name":"calculate_properties","arguments":{"structure":"CCO","input_format":"smiles"}}
+   ```
+
+このオブジェクトは `tools/call` の引数であり、完全な HTTP/JSON-RPC リクエストではありません。
+初期化とプロトコル交渉はクライアントが行います。物性値は計算結果であり、実験測定値ではありません。
+[入門ガイド](docs/getting-started.md)を参照してください。
 
 ## FreeChemDraw MCP とは？
 
@@ -49,24 +66,16 @@ Model Context Protocol（MCP）と Streamable HTTP を使用し、対応クラ�
 利用前に `tools/list` を確認してください。代わりにオンラインエディターへ SMILES/MOL を手動で取り込むこともできます。
 [ツール](docs/tools.md)と[プライバシー](docs/privacy.md)を参照してください。
 
-## クイックスタート
+## FreeChemDraw で編集を続ける
 
-1. リモート Streamable HTTP に対応するクライアントを選びます。
-2. サーバー URL を次の値に設定します。
+1. エージェントに正規化済みの SMILES を返すよう依頼するか、`convert_structure` の `output_format=mol` で MOL 構造を取得します。
+2. [FreeChemDraw オンラインエディター](https://freechemdraw.com/)を開き、SMILES を貼り付けるか、保存した MOL ファイルを取り込みます。
+3. エディターで構造を確認し、編集を続けます。MOL から SMILES への変換では座標や注釈が失われるため、それらを保持したい場合は MOL を使用してください。
 
-   ```text
-   https://ai.freechemdraw.com/mcp
-   ```
-
-3. 接続してツールを検出し、クライアント経由で次のエタノールの例を呼び出します。
-
-   ```json
-   {"name":"calculate_properties","arguments":{"structure":"CCO","input_format":"smiles"}}
-   ```
-
-このオブジェクトは `tools/call` の引数であり、完全な HTTP/JSON-RPC リクエストではありません。
-初期化とプロトコル交渉はクライアントが行います。物性値は計算結果であり、実験測定値ではありません。
-[入門ガイド](docs/getting-started.md)を参照してください。
+自動編集リンクは、実際のホスト環境の `tools/list` に `get_editor_link` が表示される場合にのみ利用できます。
+構造の暗号化された一時保存には利用者の明示的な同意が必要で、リンクは一度限り有効、10 分で失効します。
+ツールが無効な場合や同意がない場合は手動で取り込んでください。クライアントとエディターの自動同期は保証しません。
+[ツール](docs/tools.md)と[プライバシー](docs/privacy.md)を参照してください。
 
 ## MCP クライアント設定
 
@@ -89,23 +98,9 @@ curl --fail-with-body https://ai.freechemdraw.com/api/v1/properties/calculate -H
 
 ## 利用制限
 
-無料の基本サービスには公平な利用のための制限があり、サービスレベルは保証されません。
-以下は参照設定値です。本番環境の実効値は現在の公式サービス文書で確認してください。
-
-| 制限 | 参照値 |
-| --- | --- |
-| IP ごとの HTTP リクエスト | 毎分 20 回 |
-| サーバープロセスごとの HTTP リクエスト | 毎分 120 回 |
-| 構造ごとの原子数 | 256 |
-| 同時化学処理数 | 2 |
-| 処理タイムアウト | 10 秒 |
-| HTTP リクエスト本文 | 1 MiB |
-| SMILES / MOL の長さ | 16,384 / 262,144 文字 |
-| 画像サイズ | 各辺 64–2048 ピクセル、合計 2,000,000 ピクセル以下 |
-
-初期化とツール検出も HTTP 制限に含まれます。HTTP 429 では `Retry-After` に従い、間隔を延ばして再試行してください。
-現在の公開契約では、アカウントによる API Key、有料クレジット、化学処理枠の増加は提供しません。
-[利用制限](docs/usage-limits.md)を参照してください。
+無料の基本サービスにはレート制限があり、サービスレベルは保証されません。
+初期化とツール検出も利用量に含まれます。HTTP 429 では `Retry-After` に従い、間隔を延ばして再試行してください。
+詳細な参照値とエラー処理は[利用制限](docs/usage-limits.md)、本番環境の実効値は現在の[公式サービス文書](https://ai.freechemdraw.com/docs/)で確認してください。
 
 ## プライバシー
 
